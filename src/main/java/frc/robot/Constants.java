@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.subsystems.SwerveModule;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,5 +17,12 @@ package frc.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+  }
+
+  public static class RobotConstants{
+    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(1, 0, 0, "Front Left");
+    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(1, 0, 0, "Front Right");
+    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(1, 0, 0, "Back Left");
+    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(1, 0, 0, "Back Right");
   }
 }
