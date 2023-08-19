@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.SwerveModule;
+import frc.robot.subsystems.SwerveModule.Constants.encoderType;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -19,10 +22,18 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
+  
   public static class RobotConstants{
-    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(1, 0, 0, "Front Left");
-    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(1, 0, 0, "Front Right");
-    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(1, 0, 0, "Back Left");
-    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(1, 0, 0, "Back Right");
+    public static final double trackWidth = Units.inchesToMeters(19.25);
+    public static final double trackLength = Units.inchesToMeters(20.25);
+    public static final double driveGearRatio = 6.67;
+    public static final double steerGearRatio = 1.2;
+    public static final double wheelDiameter = Units.inchesToMeters(4); 
+    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(0, 13, 23, 0, "Front Left", encoderType.Spark);
+    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(1, 11, 21, 0, "Front Right", encoderType.Spark);
+    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(2, 12, 22, 0, "Back Left", encoderType.Spark);
+    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(3, 10, 20, 0, "Back Right", encoderType.Spark);
   }
+
+
 }
