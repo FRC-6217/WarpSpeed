@@ -51,13 +51,26 @@ public class SwerveModule extends SubsystemBase{
     steerEncoder = steerMotor.getEncoder();
     drivePID = driveMotor.getPIDController();
     steerPID = steerMotor.getPIDController();
+
+    driveMotor.restoreFactoryDefaults();
+    steerMotor.restoreFactoryDefaults();
+
+    drivePID.setP(0);
+    drivePID.setD(0);
+    drivePID.setI(0);
+    drivePID.setFF(0);
+
+    steerPID.setP(0);
+    steerPID.setD(0);
+    steerPID.setI(0);
+    steerPID.setFF(0);
     name = new String(constants.name);
     operationOrderID = constants.position;
-    SmartDashboard.putData(this);
+    SmartDashboard.putData(name, this);
   }
   
   public void initSendable(SendableBuilder builder) {
-    builder.setSmartDashboardType(name);
+    builder.setSmartDashboardType("Swerve Module");
     builder.addDoubleProperty("DriveSpeed", this::getDriveSpeed, null);
     builder.addDoubleProperty("DrivePosition", this::getDrivePosition, null);
     builder.addDoubleProperty("SteerSpeed", this::getSteerSpeed, null);
@@ -153,12 +166,12 @@ public class SwerveModule extends SubsystemBase{
   
   private void setSpeed(SwerveModuleState state){
     driveSetpoint = state.speedMetersPerSecond;
-    driveMotor.set(state.speedMetersPerSecond);
+    driveMotor.set(0);
   }
 
   private void setAngle(SwerveModuleState state){
     steerSetpoint = state.angle.getDegrees();
-    steerPID.setReference(steerSetpoint, ControlType.kPosition);
+    steerPID.setReference(0, ControlType.kPosition);
   }
   public void setState(SwerveModuleState state){
     setAngle(state);

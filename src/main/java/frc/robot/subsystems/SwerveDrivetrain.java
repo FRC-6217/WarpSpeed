@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -39,6 +40,7 @@ public class SwerveDrivetrain extends SubsystemBase {
                                             new Translation2d(Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2));
     modules = new SwerveModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
     sOdometry = new SwerveDriveOdometry(sKinematics, getGyroRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
+    SmartDashboard.putData("DriveTrain", this);
   }
 
   private Rotation2d getGyroRotation2d(){
