@@ -9,6 +9,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.SwerveDrivetrain;
 
@@ -26,6 +27,7 @@ public class Drive extends CommandBase {
     this.rotationSupplier = rotationSupplier;
     this.strafeSupplier = strafeSupplier;
     this.swerveDrivetrain = swerveDrivetrain;
+    SmartDashboard.putData("Teleop Drive", this);
   }
 
   // Called when the command is initially scheduled.
@@ -36,7 +38,7 @@ public class Drive extends CommandBase {
   @Override
   public void execute() {
     //TODO add Deadband, add Govenor
-    swerveDrivetrain.drive(new Translation2d(strafeSupplier.getAsDouble(), translationSupplier.getAsDouble()), new Rotation2d(rotationSupplier.getAsDouble()));
+    swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()), getRotation());
   }
 
   // Called once the command ends or is interrupted.
@@ -54,18 +56,22 @@ public class Drive extends CommandBase {
     builder.setSmartDashboardType("DriveCommand");
     builder.addDoubleProperty("Strafe: ", this::getStrafe, null);
     builder.addDoubleProperty("Translation: ", this::getTranslation, null);
-    builder.addDoubleProperty("Rotation: ", this::getRotation, null);
+    builder.addDoubleProperty("Rotation: ", this::getRotationRaw, null);
   }
 
   private double getStrafe() {
-    return strafeSupplier.getAsDouble();
+    return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*.5;
   }
 
   private double getTranslation() {
-    return translationSupplier.getAsDouble();
+    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*.5;
   }
 
-  private double getRotation() {
-    return rotationSupplier.getAsDouble();
+  private Rotation2d getRotation() {
+    return new Rotation2d(Math.abs(rotationSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*.5);
+  }
+
+  private double getRotationRaw() {
+    return getRotation().getDegrees();
   }
 }

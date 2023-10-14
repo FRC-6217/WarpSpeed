@@ -19,6 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.interfaces.IEncoder;
@@ -27,8 +28,8 @@ import frc.robot.subsystems.SwerveModule.Constants.encoderType;
 public class SwerveModule extends SubsystemBase{
   /** Creates a new SwerveModule. */
 
-  CANSparkMax driveMotor;
-  CANSparkMax steerMotor;
+  final CANSparkMax driveMotor;
+  final CANSparkMax steerMotor;
   RelativeEncoder driveEncoder;
   RelativeEncoder steerEncoder;
   SparkMaxPIDController drivePID;
@@ -40,8 +41,15 @@ public class SwerveModule extends SubsystemBase{
   int operationOrderID;
 
   public SwerveModule(Constants constants){
+    name = new String(constants.name);
+    double startTime = Timer.getFPGATimestamp();
+    
     driveMotor = new CANSparkMax(constants.driveMotorID, MotorType.kBrushless);
+    System.out.println(name + " delta1: "+ (Timer.getFPGATimestamp() - startTime));
+
     steerMotor = new CANSparkMax(constants.steerMotorID, MotorType.kBrushless);
+    System.out.println(name + " delta2: "+ (Timer.getFPGATimestamp() - startTime));
+
     if(constants.type == encoderType.CAN){
       absEncoder = new BBCANEncoder(constants.absEncoderID);
     }else if(constants.type == encoderType.Spark){
@@ -64,25 +72,33 @@ public class SwerveModule extends SubsystemBase{
     steerPID.setD(0);
     steerPID.setI(0);
     steerPID.setFF(0);
-    name = new String(constants.name);
+
     operationOrderID = constants.position;
-    SmartDashboard.putData(name, this);
+    System.out.println(name + " delta: "+ (Timer.getFPGATimestamp() - startTime));
+
   }
-  
+
+  @Override
   public void initSendable(SendableBuilder builder) {
-    builder.setSmartDashboardType("Swerve Module");
-    builder.addDoubleProperty("DriveSpeed", this::getDriveSpeed, null);
-    builder.addDoubleProperty("DrivePosition", this::getDrivePosition, null);
-    builder.addDoubleProperty("SteerSpeed", this::getSteerSpeed, null);
-    builder.addDoubleProperty("SteerPosition", this::getSteerPosition, null);
-    builder.addDoubleProperty("DriveP", this::getDriveP, this::setDriveP);
-    builder.addDoubleProperty("DriveI", this::getDriveI, this::setDriveI);
+    
+    builder.setSmartDashboardType(name + "Swerve Module");
+    builder.addDoubleProperty(name + "DrivePosition", this::getDrivePosition, null);
+    
+    builder.addDoubleProperty(name + "DriveSpeed", this::getDriveSpeed, null);
+    
+    
+    builder.addDoubleProperty(name + "SteerSpeed", this::getSteerSpeed, null);
+    builder.addDoubleProperty(name + "SteerPosition", this::getSteerPosition, null);
+    builder.addDoubleProperty(name + "DriveP", this::getDriveP, this::setDriveP);
+    builder.addDoubleProperty(name + "DriveI", this::getDriveI, this::setDriveI);
+
     builder.addDoubleProperty("DriveD", this::getDriveD, this::setDriveD);
     builder.addDoubleProperty("SteerP", this::getSteerP, this::setSteerP);
     builder.addDoubleProperty("SteerI", this::getSteerI, this::setSteerI);
     builder.addDoubleProperty("SteerD", this::getSteerD, this::setSteerD);
     builder.addDoubleProperty(" AngleState", this::getSetPointAngle, null);
     builder.addDoubleProperty(" SpeedState", this::getSetPointSpeed, null);
+
   }
 
   private double getSetPointAngle() {
@@ -164,18 +180,24 @@ public class SwerveModule extends SubsystemBase{
     return driveEncoder.getPosition();
   }
   
+  //Check SparkMax IDs Why Move when 0???????
   private void setSpeed(SwerveModuleState state){
     driveSetpoint = state.speedMetersPerSecond;
-    driveMotor.set(0);
+    driveMotor.set(driveSetpoint);
+   // driveMotor.set(0);
   }
 
   private void setAngle(SwerveModuleState state){
     steerSetpoint = state.angle.getDegrees();
-    steerPID.setReference(0, ControlType.kPosition);
+    steerPID.setReference(steerSetpoint, ControlType.kPosition);
   }
   public void setState(SwerveModuleState state){
     setAngle(state);
     setSpeed(state);
+  }
+
+  public void setupSmartDashboard() {
+    SmartDashboard.putData(name, this);
   }
 
   @Override

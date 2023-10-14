@@ -23,11 +23,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+ // private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final SwerveDrivetrain swerveDrivetrain = new SwerveDrivetrain();
   private final Joystick mJoystick = new Joystick(0);
 
-  
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -37,7 +36,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    swerveDrivetrain.setName("driveTrain1");
     swerveDrivetrain.setDefaultCommand(new Drive(swerveDrivetrain, () -> mJoystick.getX(), () -> mJoystick.getZ(), () -> mJoystick.getY()));
+    swerveDrivetrain.setupSmartDashboard();
   }
 
   /**
@@ -55,7 +56,7 @@ public class RobotContainer {
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+   // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
 
   /**
@@ -65,6 +66,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+   // return Autos.exampleAuto(m_exampleSubsystem);
+   return null;
   }
 }

@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -22,17 +23,25 @@ import frc.robot.Constants;
 public class SwerveDrivetrain extends SubsystemBase {
   /** Creates a new SwerveDrivetrain. */
 
-  public SwerveModule frontLeftModule = new SwerveModule(Constants.RobotConstants.frontLeft);
-  public SwerveModule frontRightModule = new SwerveModule(Constants.RobotConstants.frontRight);
-  public SwerveModule backLeftModule = new SwerveModule(Constants.RobotConstants.backLeft);
-  public SwerveModule backRightModule = new SwerveModule(Constants.RobotConstants.backRight);
-  public Pigeon2 pigeon2 = new Pigeon2(50);
+  public final SwerveModule frontRightModule;// = new SwerveModule(Constants.RobotConstants.frontRight);
+  public final SwerveModule backLeftModule;// = new SwerveModule(Constants.RobotConstants.backLeft);
+  public final  SwerveModule backRightModule;// = new SwerveModule(Constants.RobotConstants.backRight);
+  public final SwerveModule frontLeftModule;// = new SwerveModule(Constants.RobotConstants.frontLeft);
+
+  public final Pigeon2 pigeon2 = new Pigeon2(50);
   public SwerveDriveOdometry sOdometry;
   public SwerveDriveKinematics sKinematics;
   public SwerveModule[] modules;
   public ChassisSpeeds cSpeeds;
 
   public SwerveDrivetrain() {
+
+    frontRightModule = new SwerveModule(Constants.RobotConstants.frontRight);
+    backLeftModule = new SwerveModule(Constants.RobotConstants.backLeft);
+    backRightModule = new SwerveModule(Constants.RobotConstants.backRight);
+    frontLeftModule = new SwerveModule(Constants.RobotConstants.frontLeft);
+
+    double startTime = Timer.getFPGATimestamp();
     cSpeeds = new ChassisSpeeds(0, 0, 0);
     sKinematics = new SwerveDriveKinematics(new Translation2d(-Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
                                             new Translation2d(Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
@@ -40,7 +49,8 @@ public class SwerveDrivetrain extends SubsystemBase {
                                             new Translation2d(Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2));
     modules = new SwerveModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
     sOdometry = new SwerveDriveOdometry(sKinematics, getGyroRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
-    SmartDashboard.putData("DriveTrain", this);
+   System.out.println("sdt" + " delta: "+ (Timer.getFPGATimestamp() - startTime));
+
   }
 
   private Rotation2d getGyroRotation2d(){
@@ -69,6 +79,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   }
 
 
+  @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("DriveTraingo");
     builder.addDoubleProperty("PigeonYaw", this::getPigeonYaw, null);
@@ -86,5 +97,12 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   private double getPigeonYaw(){
     return pigeon2.getYaw();
+  }
+
+  public void setupSmartDashboard() {
+    SmartDashboard.putData("DriveTrain", this);
+    for(SwerveModule module : modules){
+      module.setupSmartDashboard();
+    }
   }
 }
