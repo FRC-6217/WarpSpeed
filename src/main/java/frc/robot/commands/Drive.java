@@ -64,11 +64,11 @@ public class Drive extends CommandBase {
   }
 
   private double getTranslation() {
-    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*.5;
+    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*.5;
   }
 
   private Rotation2d getRotation() {
-    return new Rotation2d(Math.abs(rotationSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*.5);
+    return new Rotation2d(Math.abs(rotationSupplier.getAsDouble()) < 0.15 ? 0 : rotationSupplier.getAsDouble()*.5);
   }
 
   private double getRotationRaw() {

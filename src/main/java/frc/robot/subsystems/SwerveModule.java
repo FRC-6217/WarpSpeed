@@ -15,6 +15,7 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
@@ -68,11 +69,27 @@ public class SwerveModule extends SubsystemBase{
     drivePID.setI(0);
     drivePID.setFF(0);
 
-    steerPID.setP(0);
+    steerPID.setP(0.05);
     steerPID.setD(0);
     steerPID.setI(0);
     steerPID.setFF(0);
 
+    SmartDashboard.putNumber(name + "DrivePosition", getDrivePosition());
+    
+    SmartDashboard.putNumber(name + "DriveSpeed", getDriveSpeed());
+    
+    
+    SmartDashboard.putNumber(name + "SteerSpeed", getSteerSpeed());
+    SmartDashboard.putNumber(name + "SteerPosition", getSteerPosition());
+    SmartDashboard.putNumber(name + "DriveP", getDriveP());
+    SmartDashboard.putNumber(name + "DriveI", getDriveI());
+
+    SmartDashboard.putNumber("DriveD", getDriveD());
+    SmartDashboard.putNumber("SteerP", getSteerP());
+    SmartDashboard.putNumber("SteerI", getSteerI());
+    SmartDashboard.putNumber("SteerD", getSteerD());
+    SmartDashboard.putNumber(" AngleState", getSetPointAngle());
+    SmartDashboard.putNumber(" SpeedState", getSetPointSpeed());
     operationOrderID = constants.position;
     System.out.println(name + " delta: "+ (Timer.getFPGATimestamp() - startTime));
 
@@ -80,8 +97,7 @@ public class SwerveModule extends SubsystemBase{
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    
-    builder.setSmartDashboardType(name + "Swerve Module");
+   // builder.setSmartDashboardType(name + "Swerve Module");
     builder.addDoubleProperty(name + "DrivePosition", this::getDrivePosition, null);
     
     builder.addDoubleProperty(name + "DriveSpeed", this::getDriveSpeed, null);
@@ -191,7 +207,13 @@ public class SwerveModule extends SubsystemBase{
     steerSetpoint = state.angle.getDegrees();
     steerPID.setReference(steerSetpoint, ControlType.kPosition);
   }
+
+  public Rotation2d getCurrentAngle(){
+    return new Rotation2d(Math.toRadians(getSteerPosition()));
+  }
   public void setState(SwerveModuleState state){
+    state = optimize(state, getCurrentAngle());
+
     setAngle(state);
     setSpeed(state);
   }
@@ -203,6 +225,58 @@ public class SwerveModule extends SubsystemBase{
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  /**
+   * Minimize the change in heading the desired swerve module state would require by potentially
+   * reversing the direction the wheel spins. Customized from WPILib's version to include placing in
+   * appropriate scope for CTRE and REV onboard control as both controllers as of writing don't have
+   * support for continuous input.
+   *
+   * @param desiredState The desired state.
+   * @param currentAngle The current module angle.
+   */
+  public static SwerveModuleState optimize(
+      SwerveModuleState desiredState, Rotation2d currentAngle) {
+    double targetAngle =
+        placeInAppropriate0To360Scope(currentAngle.getDegrees(), desiredState.angle.getDegrees());
+    double targetSpeed = desiredState.speedMetersPerSecond;
+    double delta = targetAngle - currentAngle.getDegrees();
+    if (Math.abs(delta) > 90) {
+      targetSpeed = -targetSpeed;
+      targetAngle = delta > 90 ? (targetAngle -= 180) : (targetAngle += 180);
+    }
+    return new SwerveModuleState(targetSpeed, Rotation2d.fromDegrees(targetAngle));
+  }
+
+  /**
+   * @param scopeReference Current Angle
+   * @param newAngle Target Angle
+   * @return Closest angle within scope
+   */
+  private static double placeInAppropriate0To360Scope(double scopeReference, double newAngle) {
+    double lowerBound;
+    double upperBound;
+    double lowerOffset = scopeReference % 360;
+    if (lowerOffset >= 0) {
+      lowerBound = scopeReference - lowerOffset;
+      upperBound = scopeReference + (360 - lowerOffset);
+    } else {
+      upperBound = scopeReference - lowerOffset;
+      lowerBound = scopeReference - (360 + lowerOffset);
+    }
+    while (newAngle < lowerBound) {
+      newAngle += 360;
+    }
+    while (newAngle > upperBound) {
+      newAngle -= 360;
+    }
+    if (newAngle - scopeReference > 180) {
+      newAngle -= 360;
+    } else if (newAngle - scopeReference < -180) {
+      newAngle += 360;
+    }
+    return newAngle;
   }
 
   public static class Constants{
@@ -226,4 +300,5 @@ public class SwerveModule extends SubsystemBase{
     }
     
   }
+  
 }

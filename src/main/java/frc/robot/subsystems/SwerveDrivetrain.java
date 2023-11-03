@@ -43,10 +43,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     double startTime = Timer.getFPGATimestamp();
     cSpeeds = new ChassisSpeeds(0, 0, 0);
-    sKinematics = new SwerveDriveKinematics(new Translation2d(-Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
-                                            new Translation2d(Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
-                                            new Translation2d(-Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2),
-                                            new Translation2d(Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2));
+    sKinematics = new SwerveDriveKinematics(new Translation2d(Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
+                                            new Translation2d(Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2),
+                                            new Translation2d(-Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
+                                            new Translation2d(-Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2));
     modules = new SwerveModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
     sOdometry = new SwerveDriveOdometry(sKinematics, getGyroRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
    System.out.println("sdt" + " delta: "+ (Timer.getFPGATimestamp() - startTime));
@@ -68,6 +68,15 @@ public class SwerveDrivetrain extends SubsystemBase {
   public void drive(Translation2d t2D, Rotation2d r2D2){
     cSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(t2D.getX(), t2D.getY(), r2D2.getDegrees(), getGyroRotation2d());
     SwerveModuleState[] states = sKinematics.toSwerveModuleStates(cSpeeds);
+    SmartDashboard.putNumber("t2D X", t2D.getX());
+    SmartDashboard.putNumber("t2D Y", t2D.getY());
+    SmartDashboard.putNumber("cSpeeds Y", cSpeeds.vyMetersPerSecond);
+    SmartDashboard.putNumber("state 0", states[0].speedMetersPerSecond);
+    SmartDashboard.putNumber("state 1", states[1].speedMetersPerSecond);
+    SmartDashboard.putNumber("state 2", states[2].speedMetersPerSecond);
+    SmartDashboard.putNumber("state 3", states[3].speedMetersPerSecond);
+    SmartDashboard.putNumber("state 0 Haha Cool Beans", states[0].angle.getDegrees());
+    SmartDashboard.putNumber("r2D2", r2D2.getDegrees());
     for(SwerveModule module : modules){
       module.setState(states[module.operationOrderID]);
     }
@@ -102,7 +111,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   public void setupSmartDashboard() {
     SmartDashboard.putData("DriveTrain", this);
     for(SwerveModule module : modules){
-      module.setupSmartDashboard();
+  //    module.setupSmartDashboard();
     }
   }
 }
