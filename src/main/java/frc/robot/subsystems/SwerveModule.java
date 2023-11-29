@@ -6,12 +6,15 @@ package frc.robot.subsystems;
 
 import javax.swing.text.Position;
 
+import org.opencv.core.Mat;
+
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxRelativeEncoder;
 import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -43,14 +46,10 @@ public class SwerveModule extends SubsystemBase{
 
   public SwerveModule(Constants constants){
     name = new String(constants.name);
-    double startTime = Timer.getFPGATimestamp();
-    
+
     driveMotor = new CANSparkMax(constants.driveMotorID, MotorType.kBrushless);
-    System.out.println(name + " delta1: "+ (Timer.getFPGATimestamp() - startTime));
-
     steerMotor = new CANSparkMax(constants.steerMotorID, MotorType.kBrushless);
-    System.out.println(name + " delta2: "+ (Timer.getFPGATimestamp() - startTime));
-
+  
     if(constants.type == encoderType.CAN){
       absEncoder = new BBCANEncoder(constants.absEncoderID);
     }else if(constants.type == encoderType.Spark){
@@ -59,42 +58,39 @@ public class SwerveModule extends SubsystemBase{
     driveEncoder = driveMotor.getEncoder();
     steerEncoder = steerMotor.getEncoder();
     drivePID = driveMotor.getPIDController();
+
     steerPID = steerMotor.getPIDController();
 
     driveMotor.restoreFactoryDefaults();
     steerMotor.restoreFactoryDefaults();
+
+    driveMotor.setIdleMode(IdleMode.kCoast);
+    steerMotor.setIdleMode(IdleMode.kCoast);
+
+    steerPID.setPositionPIDWrappingMaxInput(2 * Math.PI);
+    steerPID.setPositionPIDWrappingMinInput(0);
+    steerPID.setPositionPIDWrappingEnabled(true);
+
+    steerEncoder.setPositionConversionFactor((2 * Math.PI) / 58.3); // gear ratio 58
+    steerEncoder.setPosition(0);
 
     drivePID.setP(0);
     drivePID.setD(0);
     drivePID.setI(0);
     drivePID.setFF(0);
 
-    steerPID.setP(0.05);
+    steerPID.setP(0.1);
     steerPID.setD(0);
     steerPID.setI(0);
     steerPID.setFF(0);
 
-    SmartDashboard.putNumber(name + "DrivePosition", getDrivePosition());
-    
-    SmartDashboard.putNumber(name + "DriveSpeed", getDriveSpeed());
-    
-    
-    SmartDashboard.putNumber(name + "SteerSpeed", getSteerSpeed());
-    SmartDashboard.putNumber(name + "SteerPosition", getSteerPosition());
-    SmartDashboard.putNumber(name + "DriveP", getDriveP());
-    SmartDashboard.putNumber(name + "DriveI", getDriveI());
 
-    SmartDashboard.putNumber("DriveD", getDriveD());
-    SmartDashboard.putNumber("SteerP", getSteerP());
-    SmartDashboard.putNumber("SteerI", getSteerI());
-    SmartDashboard.putNumber("SteerD", getSteerD());
-    SmartDashboard.putNumber(" AngleState", getSetPointAngle());
-    SmartDashboard.putNumber(" SpeedState", getSetPointSpeed());
+
     operationOrderID = constants.position;
-    System.out.println(name + " delta: "+ (Timer.getFPGATimestamp() - startTime));
 
   }
 
+  /*
   @Override
   public void initSendable(SendableBuilder builder) {
    // builder.setSmartDashboardType(name + "Swerve Module");
@@ -116,6 +112,7 @@ public class SwerveModule extends SubsystemBase{
     builder.addDoubleProperty(" SpeedState", this::getSetPointSpeed, null);
 
   }
+  */
 
   private double getSetPointAngle() {
     return steerSetpoint;
@@ -137,7 +134,11 @@ public class SwerveModule extends SubsystemBase{
     return steerEncoder.getPosition();
   }
   private double getSteerPosition(){
-    return steerEncoder.getPosition();
+    if(steerEncoder.getPosition() < 0){
+      return 2*Math.PI + steerEncoder.getPosition() % (2* Math.PI);
+    }else{
+      return steerEncoder.getPosition() % (2* Math.PI);
+    }
   }
 
   private double getDriveP(){
@@ -189,7 +190,8 @@ public class SwerveModule extends SubsystemBase{
   }
 
   public SwerveModulePosition getModulePosition(){
-    return new SwerveModulePosition(getDistance(), absEncoder.getAngle());
+   // return new SwerveModulePosition(getDistance(), absEncoder.getAngle());
+  return new SwerveModulePosition(getDistance(), getCurrentAngle());
   }
 
   private double getDistance() {
@@ -209,13 +211,17 @@ public class SwerveModule extends SubsystemBase{
   }
 
   public Rotation2d getCurrentAngle(){
-    return new Rotation2d(Math.toRadians(getSteerPosition()));
+    return new Rotation2d(getSteerPosition());
   }
+
   public void setState(SwerveModuleState state){
-    state = optimize(state, getCurrentAngle());
+
+    state = SwerveModuleState.optimize(state, getCurrentAngle());
+    //state = optimize(state, getCurrentAngle());
 
     setAngle(state);
     setSpeed(state);
+
   }
 
   public void setupSmartDashboard() {
@@ -224,7 +230,28 @@ public class SwerveModule extends SubsystemBase{
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    SmartDashboard.putNumber(name + " Wheel Angle", Math.toDegrees(getSteerPosition()));
+    /*
+    SmartDashboard.putNumber(name + " DrivePosition", getDrivePosition());
+    SmartDashboard.putNumber(name + " DriveSpeed", getDriveSpeed());
+    
+
+    SmartDashboard.putNumber(name + " DriveP", getDriveP());
+    SmartDashboard.putNumber(name + " DriveI", getDriveI());
+    SmartDashboard.putNumber(name + " DriveD", getDriveD());
+
+    SmartDashboard.putNumber(name + " SteerP", getSteerP());
+    SmartDashboard.putNumber(name + " SteerI", getSteerI());
+    SmartDashboard.putNumber(name + " SteerD", getSteerD());
+
+    SmartDashboard.putNumber(name + " AngleState", getSetPointAngle());
+    SmartDashboard.putNumber(name + " SpeedState", getSetPointSpeed());
+
+    SmartDashboard.putNumber(name + " SteerSpeed", getSteerSpeed());
+    SmartDashboard.putNumber(name + " SteerPosition", getSteerPosition());
+
+    SmartDashboard.putNumber(name + " abs angle: ", absEncoder.getAngle().getDegrees());
+*/
   }
 
   /**

@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,7 +17,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -28,7 +32,7 @@ public class SwerveDrivetrain extends SubsystemBase {
   public final  SwerveModule backRightModule;// = new SwerveModule(Constants.RobotConstants.backRight);
   public final SwerveModule frontLeftModule;// = new SwerveModule(Constants.RobotConstants.frontLeft);
 
-  public final Pigeon2 pigeon2 = new Pigeon2(50);
+  public final WPI_Pigeon2 pigeon2 = new WPI_Pigeon2(50);
   public SwerveDriveOdometry sOdometry;
   public SwerveDriveKinematics sKinematics;
   public SwerveModule[] modules;
@@ -41,7 +45,8 @@ public class SwerveDrivetrain extends SubsystemBase {
     backRightModule = new SwerveModule(Constants.RobotConstants.backRight);
     frontLeftModule = new SwerveModule(Constants.RobotConstants.frontLeft);
 
-    double startTime = Timer.getFPGATimestamp();
+    pigeon2.reset();
+    
     cSpeeds = new ChassisSpeeds(0, 0, 0);
     sKinematics = new SwerveDriveKinematics(new Translation2d(Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
                                             new Translation2d(Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2),
@@ -49,7 +54,6 @@ public class SwerveDrivetrain extends SubsystemBase {
                                             new Translation2d(-Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2));
     modules = new SwerveModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
     sOdometry = new SwerveDriveOdometry(sKinematics, getGyroRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
-   System.out.println("sdt" + " delta: "+ (Timer.getFPGATimestamp() - startTime));
 
   }
 
@@ -60,34 +64,46 @@ public class SwerveDrivetrain extends SubsystemBase {
   private SwerveModulePosition[] getModulePositions(){
     SwerveModulePosition[] sPosition = new SwerveModulePosition[4];
     for(SwerveModule module : modules){
+      //todo remove when module is back
+      //if (module.operationOrderID != Constants.RobotConstants.backLeft.position)
       sPosition[module.operationOrderID] = module.getModulePosition();
     }
     return sPosition;
   }
 
-  public void drive(Translation2d t2D, Rotation2d r2D2){
-    cSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(t2D.getX(), t2D.getY(), r2D2.getDegrees(), getGyroRotation2d());
+
+  public void drive(Translation2d desiredTranslation, Rotation2d desiredRotation){
+    
+    //cSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(t2D.getX(), t2D.getY(), desiredRotation.getDegrees(), getGyroRotation2d());
+    //SwerveModuleState[] states = sKinematics.toSwerveModuleStates(cSpeeds);
+    
+   // cSpeeds = new ChassisSpeeds(t2D.getX(), t2D.getY() , desiredRotation.getRadians());
+    cSpeeds.vxMetersPerSecond = desiredTranslation.getX();
+    cSpeeds.vyMetersPerSecond = desiredTranslation.getY();
+    cSpeeds.omegaRadiansPerSecond = desiredRotation.getRadians();
     SwerveModuleState[] states = sKinematics.toSwerveModuleStates(cSpeeds);
-    SmartDashboard.putNumber("t2D X", t2D.getX());
-    SmartDashboard.putNumber("t2D Y", t2D.getY());
+    SmartDashboard.putNumber("Desired X", desiredTranslation.getX());
+    SmartDashboard.putNumber("Desired Y", desiredTranslation.getY());
+    SmartDashboard.putNumber("Desired Rotation: ", desiredRotation.getDegrees());
     SmartDashboard.putNumber("cSpeeds Y", cSpeeds.vyMetersPerSecond);
-    SmartDashboard.putNumber("state 0", states[0].speedMetersPerSecond);
-    SmartDashboard.putNumber("state 1", states[1].speedMetersPerSecond);
-    SmartDashboard.putNumber("state 2", states[2].speedMetersPerSecond);
-    SmartDashboard.putNumber("state 3", states[3].speedMetersPerSecond);
-    SmartDashboard.putNumber("state 0 Haha Cool Beans", states[0].angle.getDegrees());
-    SmartDashboard.putNumber("r2D2", r2D2.getDegrees());
+
     for(SwerveModule module : modules){
       module.setState(states[module.operationOrderID]);
     }
   }
+
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     sOdometry.update(getGyroRotation2d(), getModulePositions());
+    SmartDashboard.putNumber("Gyro Angle", getGyroRotation2d().getDegrees());
+    SmartDashboard.putNumber("Odometry pose X: ", sOdometry.getPoseMeters().getX());
+    SmartDashboard.putNumber("Odometry pose Y: ", sOdometry.getPoseMeters().getY());
+
   }
 
-
+/*
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("DriveTraingo");
@@ -96,12 +112,28 @@ public class SwerveDrivetrain extends SubsystemBase {
     builder.addDoubleArrayProperty("Chassis Speed: ", this::getChassisSpeed, null);
   }
 
+  */
+
   private double[] getChassisSpeed() {
     return new double[] {cSpeeds.vxMetersPerSecond, cSpeeds.vyMetersPerSecond, cSpeeds.omegaRadiansPerSecond};
   }
 
   private double[] getOdometry() {
     return new double[] {sOdometry.getPoseMeters().getX(), sOdometry.getPoseMeters().getY()};
+  }
+
+  public CommandBase getResetCommand(){
+    return this.runOnce(() -> reset());
+
+  }
+
+  private void reset() {
+    pigeon2.reset();
+    sOdometry.resetPosition(pigeon2.getRotation2d(), getModulePositions(), new Pose2d());
+    frontLeftModule.steerEncoder.setPosition(0);
+    frontRightModule.steerEncoder.setPosition(0);
+    backLeftModule.steerEncoder.setPosition(0);
+    backRightModule.steerEncoder.setPosition(0);
   }
 
   private double getPigeonYaw(){

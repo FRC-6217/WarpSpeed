@@ -29,10 +29,18 @@ public final class Constants {
     public static final double driveGearRatio = 6.67;
     public static final double steerGearRatio = 1.2;
     public static final double wheelDiameter = Units.inchesToMeters(4); 
-    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(0, 13, 23, 0, "Front Left", encoderType.Spark);
-    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(1, 11, 21, 0, "Front Right", encoderType.Spark);
-    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(2, 12, 22, 0, "Back Left", encoderType.Spark);
-    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(3, 10, 20, 0, "Back Right", encoderType.Spark);
+/*
+    // Practice Robot
+    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(0, 10, 20, 0, "Front Left", encoderType.Spark);
+    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(1, 12, 22, 0, "Front Right", encoderType.Spark);
+    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(2, 11, 21, 0, "Back Left", encoderType.Spark);
+    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(3, 13, 23, 0, "Back Right", encoderType.Spark);
+ */
+    // Competition Robot
+    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(0, 13, 12, 0, "Front Left", encoderType.Spark);
+    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(1, 3, 2, 0, "Front Right", encoderType.Spark);
+    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(2, 14, 15, 0, "Back Left", encoderType.Spark);
+    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(3, 20, 1, 0, "Back Right", encoderType.Spark);
   }
 
 
