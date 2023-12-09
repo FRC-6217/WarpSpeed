@@ -52,7 +52,7 @@ public class SwerveDrivetrain extends SubsystemBase {
                                             new Translation2d(Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2),
                                             new Translation2d(-Constants.RobotConstants.trackWidth/2, Constants.RobotConstants.trackLength/2),
                                             new Translation2d(-Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2));
-    modules = new SwerveModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
+    modules = new SwerveModule[]{backLeftModule, backRightModule, frontLeftModule, frontRightModule};
     sOdometry = new SwerveDriveOdometry(sKinematics, getGyroRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
 
   }
@@ -86,7 +86,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Desired Y", desiredTranslation.getY());
     SmartDashboard.putNumber("Desired Rotation: ", desiredRotation.getDegrees());
     SmartDashboard.putNumber("cSpeeds Y", cSpeeds.vyMetersPerSecond);
-
+    
     for(SwerveModule module : modules){
       module.setState(states[module.operationOrderID]);
     }
@@ -127,13 +127,35 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   }
 
-  private void reset() {
+  public double getAbsoluteEncoder(){
+    return backRightModule.getAbsoluteEncoder();
+  }
+
+  public void enableBrakes(){
+    for(SwerveModule module: modules){
+      if(module != null)
+      //Brakes not working look here
+      module.toggleBrakes(true);
+    }
+  }
+
+  public void unenableBrakes(){
+    for(SwerveModule module: modules){
+      if(module != null)
+      module.toggleBrakes(false);
+      }
+    }
+
+  public void reset() {
     pigeon2.reset();
     sOdometry.resetPosition(pigeon2.getRotation2d(), getModulePositions(), new Pose2d());
     frontLeftModule.steerEncoder.setPosition(0);
     frontRightModule.steerEncoder.setPosition(0);
     backLeftModule.steerEncoder.setPosition(0);
     backRightModule.steerEncoder.setPosition(0);
+    cSpeeds.omegaRadiansPerSecond = 0;
+    cSpeeds.vxMetersPerSecond = 0;
+    cSpeeds.vyMetersPerSecond = 0;
   }
 
   private double getPigeonYaw(){

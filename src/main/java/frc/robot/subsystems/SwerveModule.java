@@ -43,13 +43,18 @@ public class SwerveModule extends SubsystemBase{
   IEncoder absEncoder;
   String name;
   int operationOrderID;
+  double absEncoderOffset;
 
   public SwerveModule(Constants constants){
     name = new String(constants.name);
 
     driveMotor = new CANSparkMax(constants.driveMotorID, MotorType.kBrushless);
     steerMotor = new CANSparkMax(constants.steerMotorID, MotorType.kBrushless);
-  
+  //Add to COnstants
+
+    driveMotor.setInverted(true);
+    steerMotor.setInverted(true);
+
     if(constants.type == encoderType.CAN){
       absEncoder = new BBCANEncoder(constants.absEncoderID);
     }else if(constants.type == encoderType.Spark){
@@ -61,6 +66,7 @@ public class SwerveModule extends SubsystemBase{
 
     steerPID = steerMotor.getPIDController();
 
+
     driveMotor.restoreFactoryDefaults();
     steerMotor.restoreFactoryDefaults();
 
@@ -71,7 +77,11 @@ public class SwerveModule extends SubsystemBase{
     steerPID.setPositionPIDWrappingMinInput(0);
     steerPID.setPositionPIDWrappingEnabled(true);
 
-    steerEncoder.setPositionConversionFactor((2 * Math.PI) / 58.3); // gear ratio 58
+    //new swerve
+    steerEncoder.setPositionConversionFactor(2*Math.PI / 21.4285714286);
+  
+    // old swerve
+    //steerEncoder.setPositionConversionFactor((2 * Math.PI) / 58.3); // gear ratio 58
     steerEncoder.setPosition(0);
 
     drivePID.setP(0);
@@ -79,12 +89,12 @@ public class SwerveModule extends SubsystemBase{
     drivePID.setI(0);
     drivePID.setFF(0);
 
-    steerPID.setP(0.1);
+    steerPID.setP(0.21);
     steerPID.setD(0);
     steerPID.setI(0);
     steerPID.setFF(0);
 
-
+    absEncoderOffset = constants.absEncoderOffset;
 
     operationOrderID = constants.position;
 
@@ -198,15 +208,19 @@ public class SwerveModule extends SubsystemBase{
     return driveEncoder.getPosition();
   }
   
-  //Check SparkMax IDs Why Move when 0???????
   private void setSpeed(SwerveModuleState state){
     driveSetpoint = state.speedMetersPerSecond;
     driveMotor.set(driveSetpoint);
-   // driveMotor.set(0);
   }
 
   private void setAngle(SwerveModuleState state){
-    steerSetpoint = state.angle.getDegrees();
+    steerSetpoint = state.angle.getRadians();
+    if(steerSetpoint < 0){
+      steerSetpoint = 2*Math.PI + steerSetpoint % (2* Math.PI);
+    }else{
+      steerSetpoint = steerSetpoint % (2* Math.PI);
+    }
+    
     steerPID.setReference(steerSetpoint, ControlType.kPosition);
   }
 
@@ -224,13 +238,29 @@ public class SwerveModule extends SubsystemBase{
 
   }
 
+  public void toggleBrakes(boolean toggle){
+    if(toggle){
+    steerMotor.setIdleMode(IdleMode.kBrake);
+    driveMotor.setIdleMode(IdleMode.kBrake);
+  }
+    else{
+      driveMotor.setIdleMode(IdleMode.kCoast);
+      steerMotor.setIdleMode(IdleMode.kCoast);
+    }
+  }
+
   public void setupSmartDashboard() {
     SmartDashboard.putData(name, this);
   }
 
   @Override
   public void periodic() {
+
+    // if we aren't adjusting steering AND some time passed (5sec maybe)
+    // then get ABS enc value and set it to relative postion (with conversion?)
     SmartDashboard.putNumber(name + " Wheel Angle", Math.toDegrees(getSteerPosition()));
+    SmartDashboard.putNumber(name + " Absolute Encoder", getAbsoluteEncoder());
+    SmartDashboard.putNumber(name + " Steer Setpoints", Math.toDegrees(steerSetpoint));
     /*
     SmartDashboard.putNumber(name + " DrivePosition", getDrivePosition());
     SmartDashboard.putNumber(name + " DriveSpeed", getDriveSpeed());
@@ -311,21 +341,27 @@ public class SwerveModule extends SubsystemBase{
     public int driveMotorID;
     public int steerMotorID;
     public int absEncoderID;
+    public double absEncoderOffset;
     public enum encoderType {
       CAN,
       Spark
     }
     public encoderType type;
     public String name;
-    public Constants(int position, int driveMotorID, int steerMotorID, int absEncoderID, String name, encoderType type) {
+    public Constants(int position, int driveMotorID, int steerMotorID, int absEncoderID, double absEncoderOffset, String name, encoderType type) {
       this.position = position;
       this.driveMotorID = driveMotorID;
       this.steerMotorID = steerMotorID;
       this.absEncoderID = absEncoderID;
+      this.absEncoderOffset = absEncoderOffset;
       this.name = name;
       this.type = type;
     }
     
   }
+
+public double getAbsoluteEncoder() {
+    return (absEncoder.getRawValue()-absEncoderOffset);
+}
   
 }

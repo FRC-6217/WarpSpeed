@@ -24,8 +24,8 @@ public final class Constants {
 
   
   public static class RobotConstants{
-    public static final double trackWidth = Units.inchesToMeters(19.25);
-    public static final double trackLength = Units.inchesToMeters(20.25);
+    public static final double trackWidth = Units.inchesToMeters(24.5);
+    public static final double trackLength = Units.inchesToMeters(24.5);
     public static final double driveGearRatio = 6.67;
     public static final double steerGearRatio = 1.2;
     public static final double wheelDiameter = Units.inchesToMeters(4); 
@@ -37,10 +37,10 @@ public final class Constants {
     public static final SwerveModule.Constants backRight = new SwerveModule.Constants(3, 13, 23, 0, "Back Right", encoderType.Spark);
  */
     // Competition Robot
-    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(0, 13, 12, 0, "Front Left", encoderType.Spark);
-    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(1, 3, 2, 0, "Front Right", encoderType.Spark);
-    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(2, 14, 15, 0, "Back Left", encoderType.Spark);
-    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(3, 20, 1, 0, "Back Right", encoderType.Spark);
+    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(2, 17, 16, 60,339.2, "Front Left", encoderType.CAN);
+    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(3, 31, 2, 59,137.8, "Front Right", encoderType.CAN);
+    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(0, 18, 19, 61,309.6, "Back Left", encoderType.CAN);
+    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(1, 3, 30, 62,154.7, "Back Right", encoderType.CAN);
   }
 
 

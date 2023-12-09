@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Drive;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ResetDriveTrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SwerveDrivetrain;
 import edu.wpi.first.wpilibj.Joystick;
@@ -25,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
  // private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final SwerveDrivetrain swerveDrivetrain = new SwerveDrivetrain();
+  public final SwerveDrivetrain swerveDrivetrain = new SwerveDrivetrain();
   private final Joystick mJoystick = new Joystick(0);
 
 
@@ -38,10 +39,11 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     swerveDrivetrain.setName("driveTrain1");
-    swerveDrivetrain.setDefaultCommand(new Drive(swerveDrivetrain, () -> -m_driverController.getLeftY(), () -> m_driverController.getLeftTriggerAxis(), () -> m_driverController.getRightX()));
+    swerveDrivetrain.setDefaultCommand(new Drive(swerveDrivetrain, () -> mJoystick.getY(), () -> mJoystick.getZ(), () -> -mJoystick.getX()));
+    
     swerveDrivetrain.setupSmartDashboard();
 
-    SmartDashboard.putData("Reset Drive System", swerveDrivetrain.getResetCommand());
+    SmartDashboard.putData("Reset Drive System", new ResetDriveTrain(swerveDrivetrain));
 
   }
 

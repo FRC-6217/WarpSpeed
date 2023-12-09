@@ -26,7 +26,7 @@ public class BBCANEncoder implements IEncoder{
     @Override
     public double getRawValue() {
         // TODO Auto-generated method stub
-        return encoder.getPosition();
+        return encoder.getAbsolutePosition();
     }
 
     @Override

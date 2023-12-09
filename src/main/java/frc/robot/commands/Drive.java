@@ -39,6 +39,7 @@ public class Drive extends CommandBase {
   public void execute() {
     //TODO add Deadband, add Govenor
     swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()), getRotation());
+    
   }
 
   // Called once the command ends or is interrupted.
@@ -60,14 +61,17 @@ public class Drive extends CommandBase {
   }
 
   private double getStrafe() {
+    //return 0;
     return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*.5;
   }
 
   private double getTranslation() {
+    //return 0;
     return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*.5;
   }
 
   private Rotation2d getRotation() {
+    //return new Rotation2d(0);
     return new Rotation2d(Math.abs(rotationSupplier.getAsDouble()) < 0.15 ? 0 : rotationSupplier.getAsDouble()*.5);
   }
 
