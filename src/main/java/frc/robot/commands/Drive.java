@@ -62,12 +62,12 @@ public class Drive extends CommandBase {
 
   private double getStrafe() {
     //return 0;
-    return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*.5;
+    return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*0.5;
   }
 
   private double getTranslation() {
     //return 0;
-    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*.5;
+    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*0.5;
   }
 
   private Rotation2d getRotation() {

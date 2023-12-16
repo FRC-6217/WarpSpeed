@@ -5,17 +5,27 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.interfaces.IEncoder;
+import frc.robot.subsystems.SwerveModule.Constants;
 
 /** Add your docs here. */
 public class BBCANEncoder implements IEncoder{
     CANCoder encoder;
-    BBCANEncoder(int id){
-        encoder = new CANCoder(id);
+    BBCANEncoder(Constants constants){
+
+        encoder = new CANCoder(constants.absEncoderID);
+        encoder.configSensorDirection(true);
+        //encoder.configMagnetOffset(0);
+        encoder.configMagnetOffset(constants.absEncoderOffset);
+        //Offset Is ALways In Degrees
+        
+        encoder.configFeedbackCoefficient(0.00153416806, "radians", SensorTimeBase.PerSecond);
     }
+
 
     @Override
     public int getTest(double tomatoes) {

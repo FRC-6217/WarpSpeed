@@ -37,10 +37,10 @@ public final class Constants {
     public static final SwerveModule.Constants backRight = new SwerveModule.Constants(3, 13, 23, 0, "Back Right", encoderType.Spark);
  */
     // Competition Robot
-    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(2, 17, 16, 60,339.2, "Front Left", encoderType.CAN);
-    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(3, 31, 2, 59,137.8, "Front Right", encoderType.CAN);
-    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(0, 18, 19, 61,309.6, "Back Left", encoderType.CAN);
-    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(1, 3, 30, 62,154.7, "Back Right", encoderType.CAN);
+    public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(2, 17, 16, 60,22.239, "Front Left", encoderType.CAN);
+    public static final SwerveModule.Constants frontRight = new SwerveModule.Constants(3, 31, 2, 59,225.115, "Front Right", encoderType.CAN);
+    public static final SwerveModule.Constants backLeft = new SwerveModule.Constants(0, 18, 19, 61,56.433, "Back Left", encoderType.CAN);
+    public static final SwerveModule.Constants backRight = new SwerveModule.Constants(1, 3, 30, 62,205.952, "Back Right", encoderType.CAN);
   }
 
 

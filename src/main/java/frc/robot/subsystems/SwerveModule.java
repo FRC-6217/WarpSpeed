@@ -56,7 +56,7 @@ public class SwerveModule extends SubsystemBase{
     steerMotor.setInverted(true);
 
     if(constants.type == encoderType.CAN){
-      absEncoder = new BBCANEncoder(constants.absEncoderID);
+      absEncoder = new BBCANEncoder(constants);
     }else if(constants.type == encoderType.Spark){
       absEncoder = new BBAbsoluteEncoder(steerMotor);
     }
@@ -77,19 +77,23 @@ public class SwerveModule extends SubsystemBase{
     steerPID.setPositionPIDWrappingMinInput(0);
     steerPID.setPositionPIDWrappingEnabled(true);
 
+
     //new swerve
-    steerEncoder.setPositionConversionFactor(2*Math.PI / 21.4285714286);
+  
   
     // old swerve
     //steerEncoder.setPositionConversionFactor((2 * Math.PI) / 58.3); // gear ratio 58
-    steerEncoder.setPosition(0);
+    
+    //steerEncoder.setPosition(0);
+    steerEncoder.setPositionConversionFactor(2*Math.PI / 21.4285714286);
+    steerEncoder.setPosition(absEncoder.getRawValue());
 
     drivePID.setP(0);
     drivePID.setD(0);
     drivePID.setI(0);
     drivePID.setFF(0);
 
-    steerPID.setP(0.21);
+    steerPID.setP(0.3);
     steerPID.setD(0);
     steerPID.setI(0);
     steerPID.setFF(0);
@@ -259,7 +263,7 @@ public class SwerveModule extends SubsystemBase{
     // if we aren't adjusting steering AND some time passed (5sec maybe)
     // then get ABS enc value and set it to relative postion (with conversion?)
     SmartDashboard.putNumber(name + " Wheel Angle", Math.toDegrees(getSteerPosition()));
-    SmartDashboard.putNumber(name + " Absolute Encoder", getAbsoluteEncoder());
+    SmartDashboard.putNumber(name + " Absolute Encoder", Math.toDegrees(getAbsoluteEncoder()));
     SmartDashboard.putNumber(name + " Steer Setpoints", Math.toDegrees(steerSetpoint));
     /*
     SmartDashboard.putNumber(name + " DrivePosition", getDrivePosition());
@@ -361,7 +365,7 @@ public class SwerveModule extends SubsystemBase{
   }
 
 public double getAbsoluteEncoder() {
-    return (absEncoder.getRawValue()-absEncoderOffset);
+  return absEncoder.getRawValue();    
 }
   
 }
