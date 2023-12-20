@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 public class Drive extends CommandBase {
@@ -19,15 +20,20 @@ public class Drive extends CommandBase {
   DoubleSupplier strafeSupplier;
   DoubleSupplier rotationSupplier;
   DoubleSupplier translationSupplier;//todo make better name
+  Double governor;
+  CommandJoystick cJoystick;
 
-  public Drive(SwerveDrivetrain swerveDrivetrain, DoubleSupplier strafeSupplier, DoubleSupplier rotationSupplier, DoubleSupplier translationSupplier) {
+  public Drive(SwerveDrivetrain swerveDrivetrain, DoubleSupplier strafeSupplier, DoubleSupplier rotationSupplier, DoubleSupplier translationSupplier, CommandJoystick commandJoystick) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(swerveDrivetrain);
     this.translationSupplier = translationSupplier;
     this.rotationSupplier = rotationSupplier;
     this.strafeSupplier = strafeSupplier;
     this.swerveDrivetrain = swerveDrivetrain;
+    this.cJoystick = commandJoystick;
+    governor = (double) 1;
     SmartDashboard.putData("Teleop Drive", this);
+    
   }
 
   // Called when the command is initially scheduled.
@@ -38,8 +44,11 @@ public class Drive extends CommandBase {
   @Override
   public void execute() {
     //TODO add Deadband, add Govenor
-    swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()), getRotation());
     
+    governor = (-(cJoystick.getThrottle()-1)/2);
+    swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()), getRotation());
+    SmartDashboard.putNumber("Drive Governor", governor);
+    SmartDashboard.putNumber("Pigeon Angle", swerveDrivetrain.getAngle());
   }
 
   // Called once the command ends or is interrupted.
@@ -62,17 +71,18 @@ public class Drive extends CommandBase {
 
   private double getStrafe() {
     //return 0;
-    return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : strafeSupplier.getAsDouble()*0.5;
+
+    return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : (strafeSupplier.getAsDouble()*governor);
   }
 
   private double getTranslation() {
     //return 0;
-    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*0.5;
+    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*governor;
   }
 
   private Rotation2d getRotation() {
     //return new Rotation2d(0);
-    return new Rotation2d(Math.abs(rotationSupplier.getAsDouble()) < 0.15 ? 0 : rotationSupplier.getAsDouble()*.5);
+    return new Rotation2d(Math.abs(rotationSupplier.getAsDouble()) < 0.15 ? 0 : rotationSupplier.getAsDouble()*governor);
   }
 
   private double getRotationRaw() {

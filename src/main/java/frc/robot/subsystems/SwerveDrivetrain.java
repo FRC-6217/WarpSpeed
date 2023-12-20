@@ -54,7 +54,7 @@ public class SwerveDrivetrain extends SubsystemBase {
                                             new Translation2d(-Constants.RobotConstants.trackWidth/2, -Constants.RobotConstants.trackLength/2));
     modules = new SwerveModule[]{backLeftModule, backRightModule, frontLeftModule, frontRightModule};
     sOdometry = new SwerveDriveOdometry(sKinematics, getGyroRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d()));
-
+    pigeon2.getAngle();
   }
 
   private Rotation2d getGyroRotation2d(){
@@ -76,7 +76,7 @@ public class SwerveDrivetrain extends SubsystemBase {
     
     //cSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(t2D.getX(), t2D.getY(), desiredRotation.getDegrees(), getGyroRotation2d());
     //SwerveModuleState[] states = sKinematics.toSwerveModuleStates(cSpeeds);
-    
+  
    // cSpeeds = new ChassisSpeeds(t2D.getX(), t2D.getY() , desiredRotation.getRadians());
     cSpeeds.vxMetersPerSecond = desiredTranslation.getX();
     cSpeeds.vyMetersPerSecond = desiredTranslation.getY();
@@ -168,4 +168,8 @@ public class SwerveDrivetrain extends SubsystemBase {
   //    module.setupSmartDashboard();
     }
   }
+
+public double getAngle() {
+    return pigeon2.getYaw();
+}
 }
