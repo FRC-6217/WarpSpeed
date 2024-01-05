@@ -6,12 +6,14 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import frc.robot.Constants;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 public class Drive extends CommandBase {
@@ -46,7 +48,8 @@ public class Drive extends CommandBase {
     //TODO add Deadband, add Govenor
     
     governor = (-(cJoystick.getThrottle()-1)/2);
-    swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()), getRotation());
+    
+    swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()).times(governor*Constants.RobotConstants.driveMaxVelo), getRotation()*(governor*Constants.RobotConstants.rotationMaxAngleVelo));
     SmartDashboard.putNumber("Drive Governor", governor);
     SmartDashboard.putNumber("Pigeon Angle", swerveDrivetrain.getAngle());
   }
@@ -71,21 +74,23 @@ public class Drive extends CommandBase {
 
   private double getStrafe() {
     //return 0;
-
-    return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : (strafeSupplier.getAsDouble()*governor);
+    return MathUtil.applyDeadband(strafeSupplier.getAsDouble(), 0.15);
+   // return Math.abs(strafeSupplier.getAsDouble()) < 0.15 ? 0 : (strafeSupplier.getAsDouble()*governor);
   }
 
   private double getTranslation() {
     //return 0;
-    return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*governor;
+    return MathUtil.applyDeadband(translationSupplier.getAsDouble(), 0.15);
+    //return Math.abs(translationSupplier.getAsDouble()) < 0.15 ? 0 : translationSupplier.getAsDouble()*governor;
   }
 
-  private Rotation2d getRotation() {
+  private double getRotation() {
     //return new Rotation2d(0);
-    return new Rotation2d(Math.abs(rotationSupplier.getAsDouble()) < 0.15 ? 0 : rotationSupplier.getAsDouble()*governor);
+    return MathUtil.applyDeadband(rotationSupplier.getAsDouble(), 0.15);
+    //return(Math.abs((rotationSupplier.getAsDouble()) < 0.15 ? 0 : rotationSupplier.getAsDouble()*governor));
   }
 
   private double getRotationRaw() {
-    return getRotation().getDegrees();
+    return getRotation();
   }
 }

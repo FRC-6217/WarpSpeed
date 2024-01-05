@@ -28,7 +28,10 @@ public final class Constants {
     public static final double trackLength = Units.inchesToMeters(24.5);
     public static final double driveGearRatio = 6.67;
     public static final double steerGearRatio = 1.2;
-    public static final double wheelDiameter = Units.inchesToMeters(4); 
+    public static final double wheelDiameter = Units.inchesToMeters(4);
+    public static final double driveMaxVelo = (5676/60/steerGearRatio)*(wheelDiameter)*Math.PI;
+    public static final double rotationMaxAngleVelo = 2*Math.PI;
+    //Random numberdecided make actually number that the angle velo max actually is. 
 /*
     // Practice Robot
     public static final SwerveModule.Constants frontLeft = new SwerveModule.Constants(0, 10, 20, 0, "Front Left", encoderType.Spark);

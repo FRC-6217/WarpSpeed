@@ -214,7 +214,11 @@ public class SwerveModule extends SubsystemBase{
   
   private void setSpeed(SwerveModuleState state){
     driveSetpoint = state.speedMetersPerSecond;
+    if(Math.abs(driveSetpoint) > .03){
     driveMotor.set(driveSetpoint);
+    } else{
+      driveMotor.set(0);
+    }
   }
 
   private void setAngle(SwerveModuleState state){
@@ -224,7 +228,7 @@ public class SwerveModule extends SubsystemBase{
     }else{
       steerSetpoint = steerSetpoint % (2* Math.PI);
     }
-    
+    //steerSetpoint = (Math.abs(steerSetpoint-getSteerPosition()) < 0.15) ? 0 : steerSetpoint;
     steerPID.setReference(steerSetpoint, ControlType.kPosition);
   }
 
@@ -265,6 +269,8 @@ public class SwerveModule extends SubsystemBase{
     SmartDashboard.putNumber(name + " Wheel Angle", Math.toDegrees(getSteerPosition()));
     SmartDashboard.putNumber(name + " Absolute Encoder", Math.toDegrees(getAbsoluteEncoder()));
     SmartDashboard.putNumber(name + " Steer Setpoints", Math.toDegrees(steerSetpoint));
+    
+    SmartDashboard.putNumber(name + "RPM of Motor", driveMotor.getEncoder().getVelocity());
     /*
     SmartDashboard.putNumber(name + " DrivePosition", getDrivePosition());
     SmartDashboard.putNumber(name + " DriveSpeed", getDriveSpeed());
