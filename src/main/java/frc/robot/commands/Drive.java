@@ -48,8 +48,8 @@ public class Drive extends CommandBase {
     //TODO add Deadband, add Govenor
     
     governor = (-(cJoystick.getThrottle()-1)/2);
-    
-    swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()).times(governor*Constants.RobotConstants.driveMaxVelo), getRotation()*(governor*Constants.RobotConstants.rotationMaxAngleVelo));
+    // Negative on the Angle
+    swerveDrivetrain.drive(new Translation2d(getStrafe(), getTranslation()).times(governor*Constants.RobotConstants.driveMaxVelo), getRotation()*(Constants.RobotConstants.rotationMaxAngleVelo));
     SmartDashboard.putNumber("Drive Governor", governor);
     SmartDashboard.putNumber("Pigeon Angle", swerveDrivetrain.getAngle());
   }
