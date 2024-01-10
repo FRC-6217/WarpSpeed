@@ -73,7 +73,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   public void drive(Translation2d desiredTranslation, double desiredRotation){
     
-    cSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredTranslation.getX(), desiredTranslation.getY(), desiredRotation, getGyroRotation2d());
+    cSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredTranslation.getX(), desiredTranslation.getY(), desiredRotation, getGyroRotation2d().times(-1));
     //SwerveModuleState[] states = sKinematics.toSwerveModuleStates(cSpeeds);
   
    // cSpeeds = new ChassisSpeeds(t2D.getX(), t2D.getY() , desiredRotation.getRadians());
